@@ -11,6 +11,23 @@ class TestSwipeTriggerCore : public Test
     Q_OBJECT
 
 private slots:
+    void canContinue_locked__keepsDirectionButChecksSpeed()
+    {
+        SwipeTriggerCore core(SwipeDirection::Right);
+        core.setLockDirection(true);
+
+        SwipeTriggerUpdateEvent event;
+        event.setAverageAngle(90);
+        QVERIFY(!core.canUpdate(event));
+        QVERIFY(core.canContinue(event));
+
+        core.setSpeed(TriggerSpeed::Fast);
+        event.setSpeed(TriggerSpeed::Slow);
+        QVERIFY(!core.canContinue(event));
+        event.setSpeed(TriggerSpeed::Fast);
+        QVERIFY(core.canContinue(event));
+    }
+
     void canUpdate_currentAngleDoesNotMatchRange_averageAngleMatchesRange__returnsTrue()
     {
         SwipeTriggerCore core(30, 60);
