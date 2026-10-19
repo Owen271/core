@@ -115,7 +115,13 @@ public:
     bool bidirectional() const { return m_bidirectional; }
     void setBidirectional(bool value) { m_bidirectional = value; }
 
+    /**
+     * Keep accepting direction changes after the trigger starts. Defaults to false.
+     */
+    void setLockDirection(bool value) { m_lockDirection = value; }
+
     bool canUpdate(const TriggerUpdateEvent &event) const override;
+    bool canContinue(const TriggerUpdateEvent &event) const override;
     void updateActions(const std::vector<std::unique_ptr<TriggerAction>> &actions, const TriggerUpdateEvent &event) const override;
 
 private:
@@ -139,6 +145,7 @@ private:
     qreal m_minAngle{};
     qreal m_maxAngle{};
     bool m_bidirectional{};
+    bool m_lockDirection{};
 
     friend class TestSwipeTriggerCore;
 };

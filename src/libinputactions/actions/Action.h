@@ -21,6 +21,7 @@
 #include <QString>
 #include <libinputactions/PointF.h>
 #include <memory>
+#include <optional>
 
 namespace InputActions
 {
@@ -40,6 +41,8 @@ struct ActionExecutionArguments
          * For the move_by_delta mouse action.
          */
         PointF motionPointDelta;
+        // Averaged swipe direction: right=0, up=90, left=180, down=270.
+        std::optional<qreal> motionAngle;
     } inputActionArgs;
 };
 

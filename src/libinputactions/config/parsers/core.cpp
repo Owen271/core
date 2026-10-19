@@ -26,11 +26,13 @@
 #include "utils.h"
 #include <QRegularExpression>
 #include <QString>
+#include <cmath>
 #include <libinputactions/PointF.h>
 #include <libinputactions/Value.h>
 #include <libinputactions/actions/ActionGroup.h>
 #include <libinputactions/actions/CommandAction.h>
 #include <libinputactions/actions/ContextMenuAction.h>
+#include <libinputactions/actions/DirectionalKeysAction.h>
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/actions/PlasmaGlobalShortcutAction.h>
 #include <libinputactions/actions/ReplaceTextAction.h>
@@ -164,6 +166,31 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
         result = std::make_unique<ContextMenuAction>(contextMenuNode->as<std::vector<std::unique_ptr<MenuItem>>>());
     } else if (const auto *functionNode = node->at("function")) {
         result = std::make_unique<JSFunctionAction>(parseFunction(functionNode), functionNode->shared_from_this());
+    } else if (const auto *directionalNode = node->mapAt("directional_keys")) {
+        qreal distance = 75;
+        if (const auto *distanceNode = directionalNode->at("distance")) {
+            distance = distanceNode->as<qreal>();
+            if (!std::isfinite(distance) || distance <= 0) {
+                throw InvalidValueConfigException(distanceNode, "Distance must be finite and greater than zero.");
+            }
+        }
+        const auto parseBindings = [](const Node *bindings) {
+            DirectionalKeysAction::Bindings result;
+            if (bindings) {
+                const std::array<const char *, 4> names = {"left", "right", "up", "down"};
+                for (size_t i = 0; i < names.size(); ++i) {
+                    if (const auto *binding = bindings->at(names[i])) {
+                        result[i] = binding->as<std::vector<KeyboardKey>>();
+                    }
+                }
+            }
+            return result;
+        };
+        auto action = std::make_unique<DirectionalKeysAction>(distance,
+                                                              parseBindings(directionalNode->mapAt("keys", true)),
+                                                              parseBindings(directionalNode->mapAt("initial")));
+        loadSetter(action, &DirectionalKeysAction::setRepeatCondition, directionalNode->at("repeat_conditions"));
+        result = std::move(action);
     } else if (const auto *inputNode = node->at("input")) {
         auto action = std::make_unique<InputAction>(inputNode->as<std::vector<InputActionItem>>());
         loadSetter(action, &InputAction::setDelay, node->at("delay"));

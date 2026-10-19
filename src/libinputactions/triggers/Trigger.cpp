@@ -54,7 +54,7 @@ bool Trigger::canActivate(const TriggerActivationEvent &event) const
 
 bool Trigger::canUpdate(const TriggerUpdateEvent &event) const
 {
-    return m_core->canUpdate(event);
+    return m_started ? m_core->canContinue(event) : m_core->canUpdate(event);
 }
 
 bool Trigger::endIfCannotUpdate() const

@@ -79,3 +79,7 @@ libinputactions_add_test(TestTriggerNodeParser SOURCES config/parsers/triggers/T
 libinputactions_add_test(TestValue SOURCES TestValue.cpp)
 libinputactions_add_test(TestVariableConditionNodeParser SOURCES config/parsers/conditions/TestVariableConditionNodeParser.cpp)
 libinputactions_add_test(TestVectorNodeParser SOURCES config/parsers/containers/TestVectorNodeParser.cpp)
+
+add_executable(TestDesktopGestures desktop/TestDesktopGestures.cpp)
+target_link_libraries(TestDesktopGestures PRIVATE libinputactions Qt6::Core yaml-cpp)
+add_test(NAME TestDesktopGestures COMMAND TestDesktopGestures)
